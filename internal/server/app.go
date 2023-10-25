@@ -1,7 +1,8 @@
-package main
+package server
 
 import (
 	"fmt"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"log"
 	"net"
 	"net/http"
@@ -10,7 +11,6 @@ import (
 	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const EnvKubePodName = "KUBE_POD_NAME"
@@ -54,6 +54,7 @@ func (s *Server) handleTCPPing(conn net.Conn) {
 func (s *Server) Run() {
 	prometheus.MustRegister(tcpPingCounter)
 	prometheus.MustRegister(httpPingCounter)
+	http.Handle("/metrics", promhttp.Handler())
 
 	go s.startTCPServer(s.handleTCPPing)
 	go s.startHTTPServer(s.handleHTTPPing)
@@ -89,7 +90,6 @@ func (s *Server) startTCPServer(handler func(conn net.Conn)) {
 func (s *Server) startHTTPServer(handler func(w http.ResponseWriter, r *http.Request)) {
 	log.Println("starting ping HTTP server")
 
-	http.Handle("/metrics", promhttp.Handler())
 	http.HandleFunc("/ping", handler)
 	log.Fatal(http.ListenAndServe(s.httpAddress, nil))
 }

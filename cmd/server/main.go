@@ -2,6 +2,7 @@ package main
 
 import (
 	"flag"
+	"k8s-node-latency/internal/server"
 )
 
 var (
@@ -10,6 +11,6 @@ var (
 )
 
 func main() {
-	s := NewServer(*tcpListenAddress, *httpListenAddress)
+	s := server.NewServer(*tcpListenAddress, *httpListenAddress)
 	s.Run()
 }
