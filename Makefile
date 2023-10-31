@@ -16,11 +16,7 @@ deploy-server: build-server
 # =============================================================
 
 build-client:
-	docker build -t $(DOCKER_USERNAME)/node-client:latest -f Dockerfile .
+	docker build -t $(DOCKER_USERNAME)/node-latency-client:latest -f Dockerfile .
 
 run-client: build-client
-	docker run -p 8080:8080 $(DOCKER_USERNAME)/node-client:latest
-
-deploy-client: build-client
-	kubectl apply -f config/client/daemonset.yaml
-	kubectl apply -f config/client/service.yaml
+	docker run -p 8080:8080 $(DOCKER_USERNAME)/node-latency-client:latest
