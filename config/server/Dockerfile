@@ -1,6 +1,6 @@
 FROM golang:1.20.10-alpine3.18 as builder
 WORKDIR /app
-ADD . .
+ADD ../.. .
 
 RUN CGO_ENABLED=0 GOOS=linux go build -o server-node-latency cmd/server/main.go
 
