@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: server-ds
+  labels:
+    app: server-label
+spec:
+  selector:
+    matchLabels:
+      app: server-label
+  template:
+    metadata:
+      labels:
+        app: server-label
+    spec:
+      containers:
+        - name: server-container
+          image: jaehnri/node-server:latest
+          ports:
+            - containerPort: 3000
+            - containerPort: 8080
+---
