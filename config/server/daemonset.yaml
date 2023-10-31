@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: DaemonSet
 metadata:
-  name: server-ds
+  name: node-latency-server
   labels:
-    app: server-label
+    app: node-latency-server
 spec:
   selector:
     matchLabels:
-      app: server-label
+      app: node-latency-server
   template:
     metadata:
       labels:
-        app: server-label
+        app: node-latency-server
     spec:
       containers:
         - name: server-container
-          image: jaehnri/node-server:latest
+          image: jaehnri/node-latency-server:latest
           ports:
             - containerPort: 3000
             - containerPort: 8080

@@ -1,10 +1,10 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: server-service
+  name: node-latency-server-service
 spec:
   selector:
-    app: server-label
+    app: node-latency-server
   ports:
     - name: tcp-endpoint
       port: 3000
