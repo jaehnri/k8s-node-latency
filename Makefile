@@ -1,4 +1,4 @@
-DOCKER_USERNAME := $(shell docker info | sed '/Username:/!d;s/.* //')
+DOCKER_USERNAME := $(shell hack/get-docker-username.sh)
 
 # =============================================================
 
