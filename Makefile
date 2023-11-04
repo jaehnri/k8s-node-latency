@@ -20,3 +20,8 @@ build-client:
 
 run-client: build-client
 	docker run -p 8080:8080 $(DOCKER_USERNAME)/node-latency-client:latest
+
+# =============================================================
+
+test-env:
+	./hack/create-cluster.sh
