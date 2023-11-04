@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: node-latency-client
+  labels:
+    app: node-latency-client
+spec:
+  updateStrategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: node-latency-client
+  template:
+    metadata:
+      labels:
+        app: node-latency-client
+    spec:
+      serviceAccountName: node-latency-client-service-account
+      containers:
+        - name: node-latency-client
+          image: jaehnri/node-latency-client:latest
+          imagePullPolicy: Always

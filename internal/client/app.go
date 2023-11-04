@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
-	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -18,18 +17,19 @@ import (
 	"time"
 )
 
+var (
+	serviceName = "node-latency-server-service"
+	namespace   = "default"
+)
+
 type Client struct {
-	podName        string
-	metricsAddress string
+	podName       string
+	serverAddress string
 
 	kubeClient *kubernetes.Clientset
-	dest       *v1.Service
 }
 
 func NewClient() *Client {
-	serviceName := "your-service-name"
-	namespace := "your-namespace"
-
 	config, err := rest.InClusterConfig()
 	if err != nil {
 		log.Panic("couldn't fetch the in-cluster config", err)
@@ -37,19 +37,20 @@ func NewClient() *Client {
 
 	kubeClient, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		log.Panic("couldn't create kubernetes config")
+		log.Panic("couldn't create kubernetes config", err)
 	}
 
 	service, err := kubeClient.CoreV1().Services(namespace).Get(context.Background(), serviceName, metav1.GetOptions{})
 	if err != nil {
-		log.Panic("couldn't get server ClusterIP")
+		log.Panic("couldn't get server Service: ", err)
 	}
 
 	clusterIP := service.Spec.ClusterIP
-	fmt.Printf("ClusterIP of service %s in namespace %s is %s\n", serviceName, namespace, clusterIP)
+	log.Printf("ClusterIP of service %s in namespace %s is %s\n", serviceName, namespace, clusterIP)
 
 	return &Client{
-		kubeClient: kubeClient,
+		serverAddress: clusterIP,
+		kubeClient:    kubeClient,
 	}
 }
 
@@ -77,8 +78,7 @@ func (c *Client) Run() {
 }
 
 func (c *Client) sendHTTPPing() {
-	//url := fmt.Sprintf("http://%s:8080/ping", c.dest.Spec.ClusterIP)
-	url := fmt.Sprintf("http://%s:8080/ping", "localhost")
+	url := fmt.Sprintf("http://%s:8080/ping", c.serverAddress)
 	req, _ := http.NewRequest("GET", url, nil)
 
 	var start, connect, dns time.Time

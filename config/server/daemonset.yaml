@@ -16,7 +16,7 @@ spec:
       containers:
         - name: server-container
           image: jaehnri/node-latency-server:latest
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
             - containerPort: 8080
----
