@@ -2,6 +2,7 @@ apiVersion: apps/v1
 kind: DaemonSet
 metadata:
   name: node-latency-server
+  namespace: node-latency
   labels:
     app: node-latency-server
 spec:

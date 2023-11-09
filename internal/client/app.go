@@ -19,7 +19,7 @@ import (
 
 var (
 	serviceName = "node-latency-server-service"
-	namespace   = "default"
+	namespace   = "node-latency"
 )
 
 type Client struct {
