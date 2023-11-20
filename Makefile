@@ -9,6 +9,10 @@ deploy-server: build-server
 	kubectl apply -f config/server/daemonset.yaml
 	kubectl apply -f config/server/service.yaml
 
+rollout-server: build-server
+	kind load docker-image node-latency-server:test --name=node-latency
+	kubectl rollout restart daemonset node-latency-server -n node-latency
+
 # =============================================================
 
 build-client:
@@ -24,6 +28,10 @@ deploy-client: build-client
 	kubectl apply -f config/client/service-account.yaml
 	kubectl apply -f config/client/daemonset.yaml
 	kubectl apply -f config/client/service.yaml
+
+rollout-client: build-client
+	kind load docker-image node-latency-client:test --name=node-latency
+	kubectl rollout restart daemonset node-latency-client -n node-latency
 
 # =============================================================
 

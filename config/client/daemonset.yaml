@@ -23,3 +23,12 @@ spec:
         - name: node-latency-client
           image: node-latency-client:test
           imagePullPolicy: Never
+          env:
+            - name: KUBE_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName

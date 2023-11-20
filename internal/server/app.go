@@ -1,8 +1,7 @@
 package server
 
 import (
-	"fmt"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
+	"encoding/json"
 	"log"
 	"net"
 	"net/http"
@@ -11,40 +10,74 @@ import (
 	"syscall"
 
 	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const EnvKubePodName = "KUBE_POD_NAME"
+const EnvKubeNodeName = "KUBE_NODE_NAME"
+
+type NodeLatencyResponse struct {
+	ServerNodeName string `json:"serverNodeName"`
+	ServerPodName  string `json:"serverPodName"`
+}
 
 type Server struct {
-	podName string
+	podName  string
+	nodeName string
 
 	tcpAddress  string
 	httpAddress string
 }
 
 func NewServer(tcpAddress, httpAddress string) *Server {
+	podName, exists := os.LookupEnv(EnvKubePodName)
+	if !exists {
+		log.Panic("couldn't retrieve podname")
+	}
+
+	nodeName, exists := os.LookupEnv(EnvKubeNodeName)
+	if !exists {
+		log.Panic("couldn't retrieve node name")
+	}
 	return &Server{
-		podName:     os.Getenv(EnvKubePodName),
+		nodeName:    nodeName,
+		podName:     podName,
 		tcpAddress:  tcpAddress,
 		httpAddress: httpAddress,
 	}
 }
 
+func (s *Server) generateResponse() []byte {
+	serverInfo := NodeLatencyResponse{
+		ServerNodeName: s.nodeName,
+		ServerPodName:  s.podName,
+	}
+
+	responseJSON, err := json.Marshal(serverInfo)
+	if err != nil {
+		log.Println("couldn't marshal response to JSON", err)
+	}
+
+	return responseJSON
+}
+
 func (s *Server) handleHTTPPing(w http.ResponseWriter, r *http.Request) {
 	log.Println("received call to HTTP /ping")
 	httpPingCounter.Inc()
+	w.WriteHeader(http.StatusCreated)
+	w.Header().Set("Content-Type", "application/json")
+	responseJSON := s.generateResponse()
 
-	_, err := fmt.Fprint(w, "pong")
-	if err != nil {
-		log.Println("couldn't respond HTTP request", err)
-	}
+	w.Write(responseJSON)
 }
 
 func (s *Server) handleTCPPing(conn net.Conn) {
 	log.Println("received call to TCP /ping")
 	tcpPingCounter.Inc()
 
-	_, err := conn.Write([]byte("pong"))
+	responseJSON := s.generateResponse()
+
+	_, err := conn.Write(responseJSON)
 	if err != nil {
 		log.Println("couldn't respond TCP request", err)
 	}
