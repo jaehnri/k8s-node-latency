@@ -1,4 +1,4 @@
-kind create cluster --name kpng-test --config=config/cluster/kind.yaml
+kind create cluster --name node-latency --config=config/cluster/kind.yaml
 
 kubectl apply -f config/cluster/namespace.yaml
 
