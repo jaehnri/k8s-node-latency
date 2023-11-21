@@ -35,5 +35,11 @@ rollout-client: build-client
 
 # =============================================================
 
+prometheus:
+	helm install prometheus prometheus-community/prometheus -n node-latency -f config/prometheus/values.yaml
+
+uninstall-prometheus:
+	helm uninstall prometheus -n node-latency
+
 test-env:
 	./hack/create-cluster.sh

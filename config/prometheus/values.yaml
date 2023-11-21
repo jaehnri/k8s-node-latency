@@ -1,21 +1,5 @@
 rbac:
   create: true
-
-podSecurityPolicy:
-  enabled: false
-
-imagePullSecrets: []
-
-serviceAccounts:
-  server:
-    create: true
-    name: ""
-    annotations: {}
-    # automountServiceAccountToken:
-
-## Additional labels to attach to all resources
-commonMetaLabels: {}
-
 ## Monitors ConfigMap changes and POSTs to a URL
 ## Ref: https://github.com/prometheus-operator/prometheus-operator/tree/main/cmd/prometheus-config-reloader
 ##
@@ -687,11 +671,6 @@ server:
 ## Prometheus server ConfigMap entries for rule files (allow prometheus labels interpolation)
 ruleFiles: {}
 
-## Prometheus server ConfigMap entries for scrape_config_files
-## (allows scrape configs defined in additional files)
-##
-scrapeConfigFiles: []
-
 ## Prometheus server ConfigMap entries
 ##
 serverFiles:
@@ -730,7 +709,11 @@ serverFiles:
       - job_name: node-latency-server
         static_configs:
           - targets:
-              - node-latency-server-service.node-latency.svc:8081/metrics
+              - node-latency-server-service.node-latency.svc:8080
+      - job_name: node-latency-client
+        static_configs:
+          - targets:
+              - node-latency-client-service.node-latency.svc:8081
       - job_name: prometheus
         static_configs:
           - targets:
@@ -1142,102 +1125,14 @@ serverFiles:
             action: replace
             target_label: node
 
-# adds additional scrape configs to prometheus.yml
-# must be a string so you have to add a | after extraScrapeConfigs:
-# example adds prometheus-blackbox-exporter scrape config
-extraScrapeConfigs: ""
-  # - job_name: 'prometheus-blackbox-exporter'
-  #   metrics_path: /probe
-  #   params:
-  #     module: [http_2xx]
-  #   static_configs:
-  #     - targets:
-  #       - https://example.com
-  #   relabel_configs:
-  #     - source_labels: [__address__]
-  #       target_label: __param_target
-  #     - source_labels: [__param_target]
-  #       target_label: instance
-  #     - target_label: __address__
-  #       replacement: prometheus-blackbox-exporter:9115
-
-# Adds option to add alert_relabel_configs to avoid duplicate alerts in alertmanager
-# useful in H/A prometheus with different external labels but the same alerts
-alertRelabelConfigs: {}
-  # alert_relabel_configs:
-  # - source_labels: [dc]
-  #   regex: (.+)\d+
-  #   target_label: dc
-
-networkPolicy:
-  ## Enable creation of NetworkPolicy resources.
-  ##
+alertmanager:
   enabled: false
 
-# Force namespace of namespaced resources
-forceNamespace: ""
-
-# Extra manifests to deploy as an array
-extraManifests: []
-  # - |
-  #   apiVersion: v1
-  #   kind: ConfigMap
-  #   metadata:
-  #   labels:
-  #     name: prometheus-extra
-  #   data:
-  #     extra-data: "value"
-
-# Configuration of subcharts defined in Chart.yaml
-
-## alertmanager sub-chart configurable values
-## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/alertmanager
-##
-alertmanager:
-  ## If false, alertmanager will not be installed
-  ##
-  enabled: true
-
-  persistence:
-    size: 2Gi
-
-  podSecurityContext:
-    runAsUser: 65534
-    runAsNonRoot: true
-    runAsGroup: 65534
-    fsGroup: 65534
-
-## kube-state-metrics sub-chart configurable values
-## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/kube-state-metrics
-##
 kube-state-metrics:
-  ## If false, kube-state-metrics sub-chart will not be installed
-  ##
-  enabled: true
+  enabled: false
 
-## prometheus-node-exporter sub-chart configurable values
-## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-node-exporter
-##
 prometheus-node-exporter:
-  ## If false, node-exporter will not be installed
-  ##
-  enabled: true
+  enabled: false
 
-  rbac:
-    pspEnabled: false
-
-  containerSecurityContext:
-    allowPrivilegeEscalation: false
-
-## prometheus-pushgateway sub-chart configurable values
-## Please see https://github.com/prometheus-community/helm-charts/tree/main/charts/prometheus-pushgateway
-##
 prometheus-pushgateway:
-  ## If false, pushgateway will not be installed
-  ##
-  enabled: true
-
-  # Optional service annotations
-  serviceAnnotations:
-    prometheus.io/probe: pushgateway
-
+  enabled: false
