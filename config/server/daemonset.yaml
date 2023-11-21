@@ -21,3 +21,12 @@ spec:
           ports:
             - containerPort: 3000
             - containerPort: 8080
+          env:
+            - name: KUBE_POD_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.name
+            - name: KUBE_NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName

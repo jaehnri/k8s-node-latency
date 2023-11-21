@@ -2,12 +2,8 @@ package client
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
-	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/rest"
 	"log"
 	"net/http"
 	"net/http/httptrace"
@@ -15,6 +11,12 @@ import (
 	"os/signal"
 	"syscall"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 )
 
 var (
@@ -22,8 +24,17 @@ var (
 	namespace   = "node-latency"
 )
 
+const EnvKubePodName = "KUBE_POD_NAME"
+const EnvKubeNodeName = "KUBE_NODE_NAME"
+
+type NodeLatencyResponse struct {
+	ServerNodeName string `json:"serverNodeName"`
+	ServerPodName  string `json:"serverPodName"`
+}
+
 type Client struct {
 	podName       string
+	nodeName      string
 	serverAddress string
 
 	kubeClient *kubernetes.Clientset
@@ -48,7 +59,19 @@ func NewClient() *Client {
 	clusterIP := service.Spec.ClusterIP
 	log.Printf("ClusterIP of service %s in namespace %s is %s\n", serviceName, namespace, clusterIP)
 
+	podName, exists := os.LookupEnv(EnvKubePodName)
+	if !exists {
+		log.Panic("couldn't retrieve podname")
+	}
+
+	nodeName, exists := os.LookupEnv(EnvKubeNodeName)
+	if !exists {
+		log.Panic("couldn't retrieve node name")
+	}
+
 	return &Client{
+		nodeName:      nodeName,
+		podName:       podName,
 		serverAddress: clusterIP,
 		kubeClient:    kubeClient,
 	}
@@ -82,31 +105,52 @@ func (c *Client) sendHTTPPing() {
 	req, _ := http.NewRequest("GET", url, nil)
 
 	var start, connect, dns time.Time
+	var dnsLatency, connLatency, firstByteLatency float64
 
 	trace := &httptrace.ClientTrace{
 		DNSStart: func(dsi httptrace.DNSStartInfo) { dns = time.Now() },
 		DNSDone: func(ddi httptrace.DNSDoneInfo) {
-			dnsLatencyHistogram.Observe(float64(time.Since(dns).Milliseconds()))
+			dnsLatency = float64(time.Since(dns).Milliseconds())
 		},
 
 		ConnectStart: func(network, addr string) { connect = time.Now() },
 		ConnectDone: func(network, addr string, err error) {
-			connectionLatencyHistogram.Observe(float64(time.Since(connect).Milliseconds()))
+			connLatency = float64(time.Since(connect).Milliseconds())
 		},
 
 		GotFirstResponseByte: func() {
-			firstByteLatencyHistogram.Observe(float64(time.Since(start).Milliseconds()))
+			firstByteLatency = float64(time.Since(start).Milliseconds())
 		},
 	}
 
 	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	start = time.Now()
-	if _, err := http.DefaultTransport.RoundTrip(req); err != nil {
+
+	res, err := http.DefaultTransport.RoundTrip(req)
+	if err != nil {
 		log.Fatal(err)
 	}
 	end := time.Since(start)
 
-	httpTotalLatencyHistogram.Observe(float64(end.Milliseconds()))
+	defer res.Body.Close()
+
+	var resNodeInfo NodeLatencyResponse
+	err = json.NewDecoder(res.Body).Decode(&resNodeInfo)
+	if err != nil {
+		panic(err)
+	}
+	dnsLatencyHistogram.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(dnsLatency)
+	connectionLatencyHistogram.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(connLatency)
+	firstByteLatencyHistogram.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(firstByteLatency)
+	httpTotalLatencyHistogram.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(float64(end.Milliseconds()))
 }
 
 func (c *Client) startMetricsServer() {
