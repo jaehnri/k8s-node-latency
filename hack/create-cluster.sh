@@ -4,3 +4,5 @@ kubectl apply -f config/cluster/namespace.yaml
 
 make deploy-server
 make deploy-client
+
+make prometheus

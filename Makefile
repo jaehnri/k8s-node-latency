@@ -41,5 +41,10 @@ prometheus:
 uninstall-prometheus:
 	helm uninstall prometheus -n node-latency
 
+# =============================================================
+
 test-env:
 	./hack/create-cluster.sh
+
+clean-test-env:
+	kind delete cluster --name node-latency
