@@ -41,6 +41,12 @@ prometheus:
 uninstall-prometheus:
 	helm uninstall prometheus -n node-latency
 
+grafana:
+	helm install grafana grafana/grafana -n node-latency -f config/grafana/values.yaml
+
+uninstall-grafana:
+	helm uninstall grafana -n node-latency
+
 # =============================================================
 
 test-env:

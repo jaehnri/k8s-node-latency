@@ -6,3 +6,4 @@ make deploy-server
 make deploy-client
 
 make prometheus
+make grafana
