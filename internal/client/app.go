@@ -24,8 +24,11 @@ var (
 	namespace   = "node-latency"
 )
 
-const EnvKubePodName = "KUBE_POD_NAME"
-const EnvKubeNodeName = "KUBE_NODE_NAME"
+const (
+	EnvKubePodName  = "KUBE_POD_NAME"
+	EnvKubeNodeName = "KUBE_NODE_NAME"
+	RoundDelay      = 2 * time.Second
+)
 
 type NodeLatencyResponse struct {
 	ServerNodeName string `json:"serverNodeName"`
@@ -80,9 +83,7 @@ func NewClient() *Client {
 func (c *Client) testLoop() {
 	for {
 		c.sendHTTPPing()
-		log.Println("round over!")
-
-		time.Sleep(2 * time.Second)
+		time.Sleep(RoundDelay)
 	}
 }
 
@@ -139,6 +140,8 @@ func (c *Client) sendHTTPPing() {
 	if err != nil {
 		panic(err)
 	}
+
+	log.Printf("trip completed: %s -> %s", c.nodeName, resNodeInfo.ServerNodeName)
 	dnsLatencyHistogram.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
 		Observe(dnsLatency)
