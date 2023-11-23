@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  name: pod-curler
+spec:
+  containers:
+  - name: curl-container
+    image: curlimages/curl:latest
+    command: ["sleep", "infinity"]  # Keep the pod running

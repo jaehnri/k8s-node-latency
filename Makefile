@@ -6,7 +6,7 @@ run-server: build-server
 
 deploy-server: build-server
 	kind load docker-image node-latency-server:test --name=node-latency
-	kubectl apply -f config/server/daemonset.yaml
+	kubectl apply -f config/server/deploy.yaml
 	kubectl apply -f config/server/service.yaml
 
 rollout-server: build-server

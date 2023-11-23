@@ -27,7 +27,7 @@ var (
 const (
 	EnvKubePodName  = "KUBE_POD_NAME"
 	EnvKubeNodeName = "KUBE_NODE_NAME"
-	RoundDelay      = 5 * time.Millisecond
+	RoundDelay      = 2 * time.Second
 )
 
 type NodeLatencyResponse struct {
@@ -127,7 +127,17 @@ func (c *Client) sendHTTPPing() {
 	req = req.WithContext(httptrace.WithClientTrace(req.Context(), trace))
 	start = time.Now()
 
-	res, err := http.DefaultTransport.RoundTrip(req)
+	// Create a custom transport with DisableKeepAlives set to true
+	transport := &http.Transport{
+		DisableKeepAlives: true,
+	}
+
+	// Use the custom transport in the client
+	client := &http.Client{
+		Transport: transport,
+	}
+
+	res, err := client.Do(req)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -141,7 +151,7 @@ func (c *Client) sendHTTPPing() {
 		panic(err)
 	}
 
-	log.Printf("trip completed: %s -> %s", c.nodeName, resNodeInfo.ServerNodeName)
+	log.Printf("trip completed: %s -> %s", c.podName, resNodeInfo.ServerPodName)
 	dnsLatencyHistogram.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
 		Observe(dnsLatency)
@@ -157,6 +167,9 @@ func (c *Client) sendHTTPPing() {
 	httpTotalLatencySummary.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
 		Observe(float64(end.Milliseconds()))
+
+	// Close the transport if it's no longer needed
+	transport.CloseIdleConnections()
 }
 
 func (c *Client) startMetricsServer() {
