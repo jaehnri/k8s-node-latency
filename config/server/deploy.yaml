@@ -1,11 +1,12 @@
 apiVersion: apps/v1
-kind: DaemonSet
+kind: Deployment
 metadata:
   name: node-latency-server
   namespace: node-latency
   labels:
     app: node-latency-server
 spec:
+  replicas: 3
   selector:
     matchLabels:
       app: node-latency-server
