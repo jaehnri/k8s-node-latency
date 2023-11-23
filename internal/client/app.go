@@ -156,7 +156,7 @@ func (c *Client) sendHTTPPing() {
 		Observe(float64(end.Milliseconds()))
 	httpTotalLatencySummary.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
-		Observe(float64(end.Seconds()))
+		Observe(float64(end.Milliseconds()))
 }
 
 func (c *Client) startMetricsServer() {
