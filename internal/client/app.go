@@ -154,6 +154,9 @@ func (c *Client) sendHTTPPing() {
 	httpTotalLatencyHistogram.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
 		Observe(float64(end.Milliseconds()))
+	httpTotalLatencySummary.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(float64(end.Seconds()))
 }
 
 func (c *Client) startMetricsServer() {
@@ -163,6 +166,7 @@ func (c *Client) startMetricsServer() {
 	prometheus.MustRegister(connectionLatencyHistogram)
 	prometheus.MustRegister(firstByteLatencyHistogram)
 	prometheus.MustRegister(httpTotalLatencyHistogram)
+	prometheus.MustRegister(httpTotalLatencySummary)
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":8081", nil))
