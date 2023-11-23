@@ -27,7 +27,7 @@ var (
 const (
 	EnvKubePodName  = "KUBE_POD_NAME"
 	EnvKubeNodeName = "KUBE_NODE_NAME"
-	RoundDelay      = 2 * time.Second
+	RoundDelay      = 500 * time.Millisecond
 )
 
 type NodeLatencyResponse struct {

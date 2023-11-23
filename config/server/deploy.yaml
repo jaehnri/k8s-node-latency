@@ -6,7 +6,7 @@ metadata:
   labels:
     app: node-latency-server
 spec:
-  replicas: 3
+  replicas: 12
   selector:
     matchLabels:
       app: node-latency-server
