@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"k8s-node-latency/internal/server"
 	"log"
 	"net/http"
 	"net/http/httptrace"
@@ -29,11 +30,6 @@ const (
 	EnvKubeNodeName = "KUBE_NODE_NAME"
 	RoundDelay      = 500 * time.Millisecond
 )
-
-type NodeLatencyResponse struct {
-	ServerNodeName string `json:"serverNodeName"`
-	ServerPodName  string `json:"serverPodName"`
-}
 
 type Client struct {
 	podName       string
@@ -145,7 +141,7 @@ func (c *Client) sendHTTPPing() {
 
 	defer res.Body.Close()
 
-	var resNodeInfo NodeLatencyResponse
+	var resNodeInfo server.NodeLatencyResponse
 	err = json.NewDecoder(res.Body).Decode(&resNodeInfo)
 	if err != nil {
 		panic(err)
@@ -167,6 +163,9 @@ func (c *Client) sendHTTPPing() {
 	httpTotalLatencySummary.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
 		Observe(float64(end.Milliseconds()))
+	httpOneWayTripLatencySummary.
+		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
+		Observe(float64(resNodeInfo.OneTripTime.Sub(start)))
 
 	// Close the transport if it's no longer needed
 	transport.CloseIdleConnections()

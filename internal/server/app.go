@@ -8,6 +8,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
@@ -17,8 +18,9 @@ const EnvKubePodName = "KUBE_POD_NAME"
 const EnvKubeNodeName = "KUBE_NODE_NAME"
 
 type NodeLatencyResponse struct {
-	ServerNodeName string `json:"serverNodeName"`
-	ServerPodName  string `json:"serverPodName"`
+	OneTripTime    time.Time `json:"oneTripTime"`
+	ServerNodeName string    `json:"serverNodeName"`
+	ServerPodName  string    `json:"serverPodName"`
 }
 
 type Server struct {
@@ -49,6 +51,7 @@ func NewServer(tcpAddress, httpAddress string) *Server {
 
 func (s *Server) generateResponse() []byte {
 	serverInfo := NodeLatencyResponse{
+		OneTripTime:    time.Now(),
 		ServerNodeName: s.nodeName,
 		ServerPodName:  s.podName,
 	}
