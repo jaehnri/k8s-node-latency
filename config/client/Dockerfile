@@ -6,5 +6,6 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o node-latency-client cmd/client/main.go
 
 FROM scratch as final
 COPY --from=builder /app/node-latency-client .
+EXPOSE 8081
 
 CMD ["./node-latency-client"]

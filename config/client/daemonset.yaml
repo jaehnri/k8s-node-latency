@@ -15,6 +15,9 @@ spec:
       app: node-latency-client
   template:
     metadata:
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8081"
       labels:
         app: node-latency-client
     spec:
