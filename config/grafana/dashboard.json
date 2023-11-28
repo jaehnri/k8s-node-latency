@@ -98,8 +98,10 @@
             "min"
           ],
           "displayMode": "table",
-          "placement": "bottom",
-          "showLegend": true
+          "placement": "right",
+          "showLegend": true,
+          "sortBy": "Last *",
+          "sortDesc": true
         },
         "tooltip": {
           "mode": "multi",
@@ -125,11 +127,11 @@
           "step": 4
         }
       ],
-      "title": "Latencies quantile 0.99 by zones",
+      "title": "Round-trip latencies 99th percentile",
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 38,
   "style": "dark",
   "tags": [],
@@ -168,6 +170,6 @@
   "timezone": "browser",
   "title": "Node-to-node Latency",
   "uid": "node-latency",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
