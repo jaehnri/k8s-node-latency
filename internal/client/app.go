@@ -147,6 +147,10 @@ func (c *Client) sendHTTPPing() {
 		panic(err)
 	}
 
+	//log.Printf("One way latency: %f", float64(resNodeInfo.OneTripTime.Sub(start).Milliseconds()))
+	//log.Printf("Total latency: %f", float64(end.Milliseconds()))
+	log.Printf("Duration of request time: %s", end)
+	log.Printf("Duration of one-way trip: %s", resNodeInfo.OneTripTime.Sub(start))
 	log.Printf("trip completed: %s -> %s", c.podName, resNodeInfo.ServerPodName)
 	dnsLatencyHistogram.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
@@ -165,7 +169,7 @@ func (c *Client) sendHTTPPing() {
 		Observe(float64(end.Milliseconds()))
 	httpOneWayTripLatencySummary.
 		WithLabelValues(c.podName, c.nodeName, resNodeInfo.ServerPodName, resNodeInfo.ServerNodeName).
-		Observe(float64(resNodeInfo.OneTripTime.Sub(start)))
+		Observe(float64(resNodeInfo.OneTripTime.Sub(start).Milliseconds()))
 
 	// Close the transport if it's no longer needed
 	transport.CloseIdleConnections()
@@ -179,6 +183,7 @@ func (c *Client) startMetricsServer() {
 	prometheus.MustRegister(firstByteLatencyHistogram)
 	prometheus.MustRegister(httpTotalLatencyHistogram)
 	prometheus.MustRegister(httpTotalLatencySummary)
+	prometheus.MustRegister(httpOneWayTripLatencySummary)
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":8081", nil))
