@@ -107,86 +107,15 @@
             "uid": "PBFA97CFB590B2093"
           },
           "editorMode": "code",
-          "expr": "avg(avg_over_time(http_total_latency_durations[5m]))",
+          "expr": "avg(avg_over_time(http_total_latency_durations[15m]))",
           "instant": false,
-          "legendFormat": "__auto",
+          "legendFormat": "Moving average - 15 minutes",
           "range": true,
           "refId": "A"
         }
       ],
-      "title": "Average node-latency in the last 5 minutes",
+      "title": "Moving Average - All nodes latency",
       "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "prometheus",
-        "uid": "PBFA97CFB590B2093"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "fillOpacity": 56,
-            "gradientMode": "hue",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              },
-              {
-                "color": "red",
-                "value": 80
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 12,
-        "y": 0
-      },
-      "id": 4,
-      "options": {
-        "bucketOffset": 0,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        }
-      },
-      "pluginVersion": "10.1.5",
-      "targets": [
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "PBFA97CFB590B2093"
-          },
-          "editorMode": "code",
-          "expr": "avg(http_total_latency_durations{quantile='0.99'}) by (clientNodeName, serverNodeName)",
-          "instant": false,
-          "legendFormat": "{{clientNodeName}} => {{ serverNodeName }}",
-          "range": true,
-          "refId": "A"
-        }
-      ],
-      "title": "Node-to-node histogram",
-      "type": "histogram"
     },
     {
       "datasource": {
@@ -274,8 +203,8 @@
       "gridPos": {
         "h": 8,
         "w": 12,
-        "x": 0,
-        "y": 8
+        "x": 12,
+        "y": 0
       },
       "id": 6,
       "options": {
@@ -304,8 +233,79 @@
           "refId": "A"
         }
       ],
-      "title": "Node-latency standard deviation in the last 15 minutes",
+      "title": "Moving Standard Deviation - All nodes latency",
       "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "PBFA97CFB590B2093"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "fillOpacity": 56,
+            "gradientMode": "hue",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              },
+              {
+                "color": "red",
+                "value": 80
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 4,
+      "options": {
+        "bucketOffset": 0,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        }
+      },
+      "pluginVersion": "10.1.5",
+      "targets": [
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "PBFA97CFB590B2093"
+          },
+          "editorMode": "code",
+          "expr": "avg(http_total_latency_durations{quantile='0.99'}) by (clientNodeName, serverNodeName)",
+          "instant": false,
+          "legendFormat": "{{clientNodeName}} => {{ serverNodeName }}",
+          "range": true,
+          "refId": "A"
+        }
+      ],
+      "title": "Histogram - Node-to-node latency",
+      "type": "histogram"
     },
     {
       "datasource": {
@@ -398,7 +398,7 @@
           "refId": "A"
         }
       ],
-      "title": "Node-to-node latency standard deviation",
+      "title": "Moving standard deviation - Node-to-node latency",
       "type": "timeseries"
     },
     {
@@ -506,7 +506,7 @@
           "step": 4
         }
       ],
-      "title": "Round-trip latencies 99th percentile",
+      "title": "99th percentile - Round-trip node-to-node latency",
       "type": "timeseries"
     },
     {
@@ -614,7 +614,7 @@
           "step": 4
         }
       ],
-      "title": "One-way latencies 99th percentile",
+      "title": "99th percentile - One-way-trip node-to-node latency",
       "type": "timeseries"
     }
   ],
@@ -626,7 +626,7 @@
     "list": []
   },
   "time": {
-    "from": "now-30m",
+    "from": "now-1h",
     "to": "now"
   },
   "timepicker": {
@@ -657,6 +657,6 @@
   "timezone": "browser",
   "title": "Node-to-node Latency",
   "uid": "node-latency",
-  "version": 3,
+  "version": 4,
   "weekStart": ""
 }
