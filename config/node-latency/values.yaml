@@ -1,5 +1,5 @@
 server:
-  replicaCount: 2
+  replicaCount: 12
   image:
     repository: jaehnri/node-latency-server
     pullPolicy: IfNotPresent
