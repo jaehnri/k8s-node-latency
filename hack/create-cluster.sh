@@ -2,8 +2,7 @@ kind create cluster --name node-latency --config=config/cluster/kind.yaml
 
 kubectl apply -f config/cluster/namespace.yaml
 
-make deploy-server
-make deploy-client
+helm install node-latency config/node-latency/. -n node-latency
 
 make prometheus
 make grafana
