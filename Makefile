@@ -47,6 +47,9 @@ grafana:
 uninstall-grafana:
 	helm uninstall grafana -n node-latency
 
+node-latency:
+	helm install node-latency config/node-latency/. -n node-latency
+
 # =============================================================
 
 test-env:
