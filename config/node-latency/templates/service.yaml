@@ -5,7 +5,6 @@ metadata:
   labels:
     {{- include "node-latency.labels" . | nindent 4 }}
 spec:
-  type: {{ .Values.service.type }}
   ports:
     - name: tcp-endpoint
       port: 3000
