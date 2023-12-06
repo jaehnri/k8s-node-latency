@@ -128,8 +128,8 @@
             "mode": "thresholds"
           },
           "custom": {
-            "fillOpacity": 80,
-            "gradientMode": "none",
+            "fillOpacity": 56,
+            "gradientMode": "hue",
             "hideFrom": {
               "legend": false,
               "tooltip": false,
@@ -626,7 +626,7 @@
     "list": []
   },
   "time": {
-    "from": "now-15m",
+    "from": "now-30m",
     "to": "now"
   },
   "timepicker": {
@@ -657,6 +657,6 @@
   "timezone": "browser",
   "title": "Node-to-node Latency",
   "uid": "node-latency",
-  "version": 2,
+  "version": 3,
   "weekStart": ""
 }
