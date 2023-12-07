@@ -5,12 +5,12 @@ run-server: build-server
 	docker run -p 8080:8080 node-latency-server:test
 
 deploy-server: build-server
-	kind load docker-image node-latency-server:test --name=node-latency
+	kind load docker-image node-latency-server:test --name=kpng-e2e-ipv4-ebpf
 	kubectl apply -f config/server/deploy.yaml
 	kubectl apply -f config/server/service.yaml
 
 rollout-server: build-server
-	kind load docker-image node-latency-server:test --name=node-latency
+	kind load docker-image node-latency-server:test --name=kpng-e2e-ipv4-ebpf
 	kubectl rollout restart daemonset node-latency-server -n node-latency
 
 # =============================================================
@@ -22,7 +22,7 @@ run-client: build-client
 	docker run -p 8081:8081 node-latency-client:test
 
 deploy-client: build-client
-	kind load docker-image node-latency-client:test --name=node-latency
+	kind load docker-image node-latency-client:test --name=kpng-e2e-ipv4-ebpf
 	kubectl apply -f config/client/cluster-role.yaml
 	kubectl apply -f config/client/cluster-role-binding.yaml
 	kubectl apply -f config/client/service-account.yaml
@@ -30,10 +30,13 @@ deploy-client: build-client
 	kubectl apply -f config/client/service.yaml
 
 rollout-client: build-client
-	kind load docker-image node-latency-client:test --name=node-latency
+	kind load docker-image node-latency-client:test --name=kpng-e2e-ipv4-ebpf
 	kubectl rollout restart daemonset node-latency-client -n node-latency
 
 # =============================================================
+
+namespace:
+	kubectl apply -f config/cluster/namespace.yaml
 
 prometheus:
 	helm install prometheus prometheus-community/prometheus -n node-latency -f config/prometheus/values.yaml
